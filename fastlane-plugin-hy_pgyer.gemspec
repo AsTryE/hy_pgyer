@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.email         = '2846306067@qq.com'
 
   spec.summary       = '蒲公英上传插件'
-  # spec.homepage      = "https://github.com/<GITHUB_USERNAME>/fastlane-plugin-hy_pgyer"
+  spec.homepage      = "https://github.com/AsTryE/hy_pgyer"
   spec.license       = "MIT"
 
   spec.files         = Dir["lib/**/*"] + %w(README.md LICENSE)
