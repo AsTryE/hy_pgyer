@@ -6,7 +6,8 @@ require 'faraday_middleware'
 module Fastlane
   module Actions
     class HyPgyerAction < Action
-      @url = ""
+      $downloadUrl = ""
+      $downloadCodeQrUrl = ""
       def self.run(params)
         api_host = "http://qiniu-storage.pgyer.com/apiv1/app/upload"
         api_key = params[:api_key]
@@ -18,7 +19,7 @@ module Fastlane
         ].detect { |e| !e.to_s.empty? }
 
         if build_file.nil?
-          UI.user_error!("You have to provide a build file")
+          UI.user_error!("没有build file文件参数")
         end
 
         UI.message "build_file: #{build_file}"
@@ -62,16 +63,18 @@ module Fastlane
             'file' => Faraday::UploadIO.new(build_file, 'application/octet-stream')
         }
 
-        UI.message "Start upload #{build_file} to pgyer..."
+        UI.message "开始上传 #{build_file} 到蒲公英..."
 
         response = pgyer_client.post api_host, params
         info = response.body
-
+        UI.success "返回结果----------#{info}"
         if info['code'] != 0
-          UI.user_error!("PGYER Plugin Error: #{info['message']}")
+          UI.user_error!("PGYER Plugin 错误: #{info['message']}")
         end
-          @url = "https://www.pgyer.com/#{info['data']['appShortcutUrl']}"
-          UI.success "Upload success. Visit this URL to see: https://www.pgyer.com/#{info['data']['appShortcutUrl']}"
+          @downloadUrl = "https://www.pgyer.com/#{info['data']['appShortcutUrl']}"
+          @downloadCodeQrUrl = info['data']['appQRCodeURL']
+          UI.success "上传成功下载地址: https://www.pgyer.com/#{info['data']['appShortcutUrl']}"
+          return [@downloadUrl, @downloadCodeQrUrl]
       end
 
       def self.description
@@ -83,11 +86,11 @@ module Fastlane
       end
 
       def self.return_value
-        [@url]
+         "返回数组类型：【第一个元素为蒲公英下载URL，第二个元素为蒲公英下载的二维码图片地址URL】"
       end
 
       def self.details
-        "蒲公英上传打包插件"
+        "蒲公英上传打包插件，返回上传后的下载地址，方便对地址进行发送到相应QQ或微信群内------"
       end
 
       def self.available_options
